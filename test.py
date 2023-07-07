@@ -4,7 +4,7 @@ df = read_excel('C:/Users/MBO/PycharmProjects/NewFastAPI/data.xlsx')
 a2_value = df.loc[1, 'ID FILIERE']
 r = str(a2_value)
 ID = []
-DEBOUCHE = []
+DEBOUCHE = [0]
 TAILLE = int(df.size / df.columns.size)
 for i in range(TAILLE):
     ID.append(df.loc[i, 'ID FILIERE'])
