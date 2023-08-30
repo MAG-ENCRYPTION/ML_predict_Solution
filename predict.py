@@ -6,16 +6,12 @@ from pandas import read_excel
 from sklearn.preprocessing import OneHotEncoder, MinMaxScaler
 from sklearn.model_selection import train_test_split, GridSearchCV, StratifiedKFold
 from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
-from sklearn.metrics import accuracy_score, mean_squared_error, r2_score
+from sklearn.metrics import accuracy_score
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
-from unipath import Path
 
-from function import sortDate, predictionAnnuelle
 
-BASE_DIR = Path(__file__).parent.replace("\\", "/")
-
-df = read_excel(f"{BASE_DIR}/data.xlsx")
+df = read_excel("C:/Users/MBO/PycharmProjects/Maint_API_AI/data.xlsx")
 # Supprimer les lignes en double et les valeurs manquantes
 df = df.drop_duplicates().dropna()
 
@@ -36,37 +32,26 @@ scaler = MinMaxScaler()
 X_scaled = scaler.fit_transform(X_encoded)
 
 # Entraîner un modèle d'arbre de décision
-model = DecisionTreeRegressor(max_depth=4)
+model = DecisionTreeRegressor(max_depth=100)
 model.fit(X_train, y_train)
 
 # Prédictions et évaluation
 y_pred_train = model.predict(X_train)
 y_pred_test = model.predict(X_test)
-mse_train = mean_squared_error(y_train, y_pred_train)
-mse_test = mean_squared_error(y_test, y_pred_test)
-r2_train = r2_score(y_train, y_pred_train)
-r2_test = r2_score(y_test, y_pred_test)
-print(f"MSE train: {mse_train:.2f}   MSE test: {mse_test:.2f}")
-print(f"R² train: {r2_train:.2f}   R² test: {r2_test:.2f}")
-
-# Définir la date de début des prédictions
-start_date = datetime.now().date()
-X_new = [["Turboréducteur n°1", "11.17.BY10", "RÉGULATEUR DE VITESSE", "335947"]]
-end_date = predictionAnnuelle(X_new, 10, model, encoder)
-print(end_date)
+accuracy_train = accuracy_score(y_train, y_pred_train.round())
+accuracy_test = accuracy_score(y_test, y_pred_test.round())
 
 # Convertir les prédictions en dates
-y_pred_train_dates = sortDate([datetime.fromordinal(int(date)).strftime('%d.%m.%Y') for date in y_pred_train])
-y_pred_test_dates = sortDate([datetime.fromordinal(int(date)).strftime('%d.%m.%Y') for date in y_pred_test])
+y_pred_train_dates = [datetime.fromordinal(int(date)).strftime('%d.%m.%Y') for date in y_pred_train]
+y_pred_test_dates = [datetime.fromordinal(int(date)).strftime('%d.%m.%Y') for date in y_pred_test]
 
 X_train_decode = encoder.inverse_transform(X_train)
+print(f"Accuracy train: {accuracy_train}   Accuracy test: {accuracy_test}")
 print(f"La prediction de la date est : {y_pred_train_dates} (train) et {X_train_decode[0][1]} ")
 
 # Tracer la relation entre la date prédite et le repère
-plt.figure(figsize=(12, 12))
-plt.scatter(X_train_decode[100:151, 0], y_pred_train_dates[100:151])
+plt.scatter(X_train_decode[1:10, 1], y_pred_train_dates[1:10])
 plt.xlabel('Machine')
 plt.ylabel('Date prédite')
-plt.xticks(rotation=90)
-plt.title('Relation entre la machine et la date prédite pour la panne')
+plt.title('Relation entre le repère et la date prédite')
 plt.show()
