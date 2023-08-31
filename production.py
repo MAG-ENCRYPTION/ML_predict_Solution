@@ -49,5 +49,6 @@ my_pred = model.predict([[int(ReverseExcelConvertDate("01.11.2010"))]])
 
 print(y_pred_test, y_pred_train)"""
 print(ReverseExcelConvertDate("01.11.2010"))
+print(y_pred_test)
 print(my_pred[0][0], my_pred[0][1], my_pred[0][2], my_pred[0][3], my_pred[0][4], my_pred[0][5], my_pred[0][5])
 
