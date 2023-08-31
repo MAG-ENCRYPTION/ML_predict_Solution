@@ -1,6 +1,7 @@
 from sklearn.ensemble import RandomForestRegressor
 from statistics import mean
 import matplotlib.pyplot as plt
+import unipath
 from matplotlib.pyplot import *
 from datetime import *
 from sklearn.neural_network import *
@@ -11,44 +12,43 @@ from sklearn.tree import DecisionTreeClassifier, DecisionTreeRegressor
 from sklearn.metrics import accuracy_score, mean_squared_error, r2_score
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.linear_model import LinearRegression
-from unipath import Path
 from function import *
-
-from function import sortDate, predictionAnnuelle
+from unipath import *
 
 BASE_DIR = Path(__file__).parent.replace("\\", "/")
 
 df = read_excel(f"{BASE_DIR}/SSC.xlsx")
-# Supprimer les lignes en double et les valeurs manquantes
-df = df.drop_duplicates().dropna()
-
-# Convertir les dates en nombres entiers
-y = df[["TONNE CANNES", "TONNE SUCRE", "RENDEMENT APPARENT USINE",
-        "PERTES TOTALES", "PERTES BAGASSE", "PERTES ECUMES",
-        "PERTES INDETERMINEES"]]
-
-X = df[["MOIS"]]
-
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=4)
 
 
-# Normaliser les données
-scaler = MinMaxScaler()
-X_scaled = scaler.fit_transform(X)
+def predict_KPI_with_date(df, day, month, year):
+    # Supprimer les lignes en double et les valeurs manquantes
+    df.drop_duplicates().dropna()
 
-# Entraîner un modèle ANN
-model = RandomForestRegressor(n_estimators=500, max_depth=100)
-model.fit(X_train, y_train)
+    inputdate = datetime(int(year), int(month), int(day)).strftime('%d.%m.%Y').__str__()
+    # Convertir les dates en nombres entiers
+    y = df
+    X = df[["MOIS"]]
 
-# Prédiction
-y_pred_train = model.predict(X_train)
-y_pred_test = model.predict(X_test)
-my_pred = model.predict([[int(ReverseExcelConvertDate("01.11.2010"))]])
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=4)
 
-"""print(X_test, X_train, y_train, y_test)
+    # Normaliser les données
+    scaler = MinMaxScaler()
+    X_scaled = scaler.fit_transform(X)
 
-print(y_pred_test, y_pred_train)"""
-print(ReverseExcelConvertDate("01.11.2010"))
-print(y_pred_test)
-print(my_pred[0][0], my_pred[0][1], my_pred[0][2], my_pred[0][3], my_pred[0][4], my_pred[0][5], my_pred[0][5])
+    # Entraîner un modèle Regression Linéaire
+    model = LinearRegression()
+    model.fit(X_train, y_train)
+    # r2 = 0
+    # Prédiction des KPI après un entrainement de train
+    y_pred_train = model.predict(X_train)
+    y_pred_test = model.predict(X_test)
+    # r2 = accuracy_score(y_test, y_pred_test)
+    my_pred = model.predict([[int(ReverseExcelConvertDate(inputdate))]])
+    print(ReverseExcelConvertDate(inputdate))
+    List = []
+    for x in my_pred[0]:
+        List.append(x)
+
+    return List
+
 

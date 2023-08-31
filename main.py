@@ -1,10 +1,12 @@
 from fastapi import FastAPI
 from pandas import *
 from numpy import *
+from unipath import Path
+from production import *
 import sklearn
 
 app = FastAPI()
-
+BASE_DIR = Path(__file__).parent.replace("\\", "/")
 
 @app.get("/")
 async def root():
@@ -13,14 +15,14 @@ async def root():
 
 @app.get("/xlsx")
 async def excel():
-    df = read_excel('C:/Users/MBO/PycharmProjects/NewFastAPI/data.xlsx')
-    a2_value = df.loc[1, 'ID FILIERE']
-    r = str(a2_value)
-    ID = []
-    TAILLE = int(df.size / df.columns.size)
-    for i in range(TAILLE):
-        ID.append(df.loc[i, 'ID FILIERE'])
-    return 
+    dico = {}
+    df = read_excel(f"{BASE_DIR}/SSC.xlsx")
+    DF = df.columns.tolist()
+    retour = predict_KPI_with_date(df, 1, 12, 2023)
+    dico[f'{DF[0]}'] = ExcelConvertDate(retour[0])
+    for i in range(1, len(retour)):
+        dico[f'{DF[i]}'] = retour[i]
+    return dico
 
 
 @app.get("/hello/{name}")
